@@ -1,0 +1,7 @@
+= Cloud Scheduler Demo
+
+== Build the project
+
+```
+mvn clean install
+```
