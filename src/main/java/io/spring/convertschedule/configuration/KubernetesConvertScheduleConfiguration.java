@@ -14,23 +14,21 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule;
+package io.spring.convertschedule.configuration;
 
-import java.util.List;
+import io.spring.convertschedule.ConvertScheduleService;
+import io.spring.convertschedule.KubernetesConvertSchedulerService;
 
-import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
-public interface ConvertScheduleService {
+@Configuration
+@Profile("kubernetes")
+public class KubernetesConvertScheduleConfiguration {
 
-	/**
-	 * Retrieve all available {@link ScheduleInfo}s.
-	 * @return list of available ScheduleInfos
-	 */
-	List<ScheduleInfo> scheduleInfoList();
-
-	/**
-	 * Add properties and commandLine args to the {@link ScheduleInfo}
-	 * @return enriched {@link ScheduleInfo}
-	 */
-	ScheduleInfo enrichScheduleMetadata(ScheduleInfo scheduleInfo);
+	@Bean
+	public ConvertScheduleService scheduleService() {
+		return new KubernetesConvertSchedulerService();
+	}
 }

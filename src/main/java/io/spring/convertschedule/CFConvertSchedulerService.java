@@ -16,11 +16,89 @@
 
 package io.spring.convertschedule;
 
-import io.pivotal.scheduler.v1.jobs.ListJobsRequest;
-import io.pivotal.scheduler.v1.jobs.ListJobsResponse;
+import java.util.List;
+import java.util.Map;
 
-import org.springframework.cloud.deployer.spi.scheduler.SchedulerException;
+import io.pivotal.scheduler.SchedulerClient;
+import io.pivotal.scheduler.v1.jobs.ListJobsRequest;
+import org.cloudfoundry.operations.CloudFoundryOperations;
+import org.cloudfoundry.operations.applications.ApplicationEnvironments;
+import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
+import org.cloudfoundry.operations.spaces.SpaceSummary;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 
 public class CFConvertSchedulerService implements ConvertScheduleService {
 
+	private Scheduler scheduler;
+
+	private CloudFoundryOperations cloudFoundryOperations;
+
+	private SchedulerClient schedulerClient;
+
+	private CloudFoundryConnectionProperties properties;
+
+	public CFConvertSchedulerService(CloudFoundryOperations cloudFoundryOperations,
+			SchedulerClient schedulerClient,
+			CloudFoundryConnectionProperties properties, Scheduler scheduler) {
+		this.scheduler = scheduler;
+		this.cloudFoundryOperations = cloudFoundryOperations;
+		this.schedulerClient = schedulerClient;
+		this.properties = properties;
+
+	}
+
+	@Override
+	public List<ScheduleInfo> scheduleInfoList() {
+		return  this.scheduler.list();
+	}
+
+	@Override
+	public ScheduleInfo enrichScheduleMetadata(ScheduleInfo scheduleInfo) {
+		ApplicationEnvironments environment = this.cloudFoundryOperations.applications().
+				getEnvironments(GetApplicationEnvironmentsRequest.builder().
+						name(scheduleInfo.getTaskDefinitionName()).
+						build()).
+				block();
+		for (Map.Entry<String, Object> var : environment.getUserProvided().entrySet()) {
+			scheduleInfo.getScheduleProperties().put(var.getKey(), (String) var.getValue());
+		}
+
+		this.getSpace(this.properties.getSpace()).flatMap(requestSummary -> {
+			return this.schedulerClient.jobs().list(ListJobsRequest.builder()
+					.spaceId(requestSummary.getId())
+					.page(1)
+					.detailed(true).build());}).block().getResources().stream().forEach(job -> {
+			int locationOfArgs = job.getCommand().indexOf("org.springframework.boot.loader.JarLauncher") + "org.springframework.boot.loader.JarLauncher".length();
+			System.out.println("******" + job.getName() + "<<<<>>>>>>" + job.getCommand().substring(locationOfArgs));
+			System.out.println(">>>>>>" + job);
+		});
+		return scheduleInfo;
+	}
+
+
+	/**
+	 * Retrieve a {@link Mono} containing a {@link SpaceSummary} for the specified name.
+	 * @param spaceName the name of space to search.
+	 * @return the {@link SpaceSummary} associated with the spaceName.
+	 */
+	private Mono<SpaceSummary> getSpace(String spaceName) {
+		return requestSpaces()
+				.cache() //cache results from first call.
+				.filter(space -> spaceName.equals(space.getName()))
+				.singleOrEmpty()
+				.cast(SpaceSummary.class);
+	}
+	/**
+	 * Retrieve a {@link Flux} containing the available {@link SpaceSummary}s.
+	 * @return {@link Flux} of {@link SpaceSummary}s.
+	 */
+	private Flux<SpaceSummary> requestSpaces() {
+		return this.cloudFoundryOperations.spaces()
+				.list();
+	}
 }

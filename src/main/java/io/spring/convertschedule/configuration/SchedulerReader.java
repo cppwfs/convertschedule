@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import io.jsonwebtoken.lang.Assert;
+import io.spring.convertschedule.ConvertScheduleService;
 
 
 import org.springframework.batch.item.ItemReader;
@@ -28,18 +29,15 @@ import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 
 public class SchedulerReader<T> implements ItemReader {
 
-	private Scheduler scheduler;
-
 	private List<ScheduleInfo> scheduleInfoList;
 
 	private int currentOffset;
 
 	private int scheduleCount;
 
-	public SchedulerReader(Scheduler scheduler) {
-		Assert.notNull(scheduler, "cloudFoundryOperations must not be null");
-		this.scheduler = scheduler;
-		scheduleInfoList = scheduler.list();
+	public SchedulerReader(ConvertScheduleService convertScheduleService) {
+		Assert.notNull(convertScheduleService, "convertScheduleService must not be null");
+		scheduleInfoList = convertScheduleService.scheduleInfoList();
 		scheduleCount = scheduleInfoList.size();
 	}
 
