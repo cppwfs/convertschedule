@@ -16,23 +16,17 @@
 
 package io.spring.convertschedule;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
-@Profile("Kubernetes")
-@Configuration
-public class KubernetesConvertSchedulerService implements ConvertScheduleService {
-	@Override
-	public List<ConvertScheduleInfo> scheduleInfoList() {
-		return new ArrayList<>();
+public class ConvertScheduleInfo extends ScheduleInfo {
+
+	private String commandLineArgs;
+
+	public String getCommandLineArgs() {
+		return commandLineArgs;
 	}
 
-	@Override
-	public ConvertScheduleInfo enrichScheduleMetadata(ConvertScheduleInfo scheduleInfo) {
-		return scheduleInfo;
+	public void setCommandLineArgs(String commandLineArgs) {
+		this.commandLineArgs = commandLineArgs;
 	}
 }

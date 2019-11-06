@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import io.jsonwebtoken.lang.Assert;
+import io.spring.convertschedule.ConvertScheduleInfo;
 import io.spring.convertschedule.ConvertScheduleService;
 
 
@@ -29,7 +30,7 @@ import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 
 public class SchedulerReader<T> implements ItemReader {
 
-	private List<ScheduleInfo> scheduleInfoList;
+	private List<ConvertScheduleInfo> scheduleInfoList;
 
 	private int currentOffset;
 

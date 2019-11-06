@@ -17,6 +17,10 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<cloudfoundry-java-lib.version>3.15.0.RELEASE</cloudfoundry-java-lib.version>
+		<reactor-core.version>3.2.0.RELEASE</reactor-core.version>
+		<reactor-netty.version>0.7.12.RELEASE</reactor-netty.version>
+		<pivotal-cf-client-reactor.version>1.1.0.RELEASE</pivotal-cf-client-reactor.version>
 	</properties>
 
 	<dependencyManagement>
@@ -55,11 +59,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
-			<version>2.1.0.BUILD-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-deployer-resource-maven</artifactId>
 			<version>2.1.0.BUILD-SNAPSHOT</version>
 		</dependency>
@@ -78,6 +77,21 @@
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.cloudfoundry</groupId>
+			<artifactId>cloudfoundry-client-reactor</artifactId>
+			<version>${cloudfoundry-java-lib.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.cloudfoundry</groupId>
+			<artifactId>cloudfoundry-operations</artifactId>
+			<version>${cloudfoundry-java-lib.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.pivotal</groupId>
+			<artifactId>pivotal-cloudfoundry-client-reactor</artifactId>
+			<version>${pivotal-cf-client-reactor.version}</version>
 		</dependency>
 	</dependencies>
 

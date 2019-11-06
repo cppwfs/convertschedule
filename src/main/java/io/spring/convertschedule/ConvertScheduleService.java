@@ -26,11 +26,11 @@ public interface ConvertScheduleService {
 	 * Retrieve all available {@link ScheduleInfo}s.
 	 * @return list of available ScheduleInfos
 	 */
-	List<ScheduleInfo> scheduleInfoList();
+	List<ConvertScheduleInfo> scheduleInfoList();
 
 	/**
 	 * Add properties and commandLine args to the {@link ScheduleInfo}
 	 * @return enriched {@link ScheduleInfo}
 	 */
-	ScheduleInfo enrichScheduleMetadata(ScheduleInfo scheduleInfo);
+	ConvertScheduleInfo enrichScheduleMetadata(ConvertScheduleInfo scheduleInfo);
 }

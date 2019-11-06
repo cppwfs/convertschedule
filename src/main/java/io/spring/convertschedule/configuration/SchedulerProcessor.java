@@ -16,6 +16,7 @@
 
 package io.spring.convertschedule.configuration;
 
+import io.spring.convertschedule.ConvertScheduleInfo;
 import io.spring.convertschedule.ConvertScheduleService;
 
 import org.springframework.batch.item.ItemProcessor;
@@ -31,7 +32,7 @@ public class SchedulerProcessor<T> implements ItemProcessor {
 
 	@Override
 	public Object process(Object o){
-		return this.convertScheduleService.enrichScheduleMetadata((ScheduleInfo ) o);
+		return this.convertScheduleService.enrichScheduleMetadata((ConvertScheduleInfo) o);
 	}
 
 }

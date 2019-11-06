@@ -18,11 +18,14 @@ package io.spring.convertschedule.configuration;
 
 import java.util.List;
 
+import io.spring.convertschedule.ConvertScheduleInfo;
+
 import org.springframework.batch.item.ItemWriter;
 
 public class SchedulerWriter<T> implements ItemWriter {
 	@Override
 	public void write(List list) throws Exception {
-		list.stream().forEach(item -> System.out.println(item));
+		list.stream().forEach(
+				item -> System.out.println(item + "<<>>" + ((ConvertScheduleInfo)item).getCommandLineArgs()));
 	}
 }
