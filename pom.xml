@@ -78,20 +78,15 @@
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
 		</dependency>
+		 <dependency>
+			 <groupId>org.springframework.cloud</groupId>
+			 <artifactId>spring-cloud-deployer-cloudfoundry</artifactId>
+			 <version>2.1.0.BUILD-SNAPSHOT</version>
+		 </dependency>
 		<dependency>
-			<groupId>org.cloudfoundry</groupId>
-			<artifactId>cloudfoundry-client-reactor</artifactId>
-			<version>${cloudfoundry-java-lib.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.cloudfoundry</groupId>
-			<artifactId>cloudfoundry-operations</artifactId>
-			<version>${cloudfoundry-java-lib.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.pivotal</groupId>
-			<artifactId>pivotal-cloudfoundry-client-reactor</artifactId>
-			<version>${pivotal-cf-client-reactor.version}</version>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-deployer-resource-docker</artifactId>
+			<version>2.1.0.BUILD-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

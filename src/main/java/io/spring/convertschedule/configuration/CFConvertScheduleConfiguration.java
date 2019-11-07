@@ -20,21 +20,19 @@ import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import io.pivotal.scheduler.SchedulerClient;
 import io.spring.convertschedule.CFConvertSchedulerService;
 import io.spring.convertschedule.ConvertScheduleService;
-import io.spring.convertschedule.ConverterCloudFoundryConnectionProperties;
-import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.operations.CloudFoundryOperations;
-import org.cloudfoundry.operations.DefaultCloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
-import org.cloudfoundry.reactor.DefaultConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
-import org.cloudfoundry.reactor.client.ReactorCloudFoundryClient;
-import org.cloudfoundry.reactor.tokenprovider.PasswordGrantTokenProvider;
 import reactor.core.publisher.Mono;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
+import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundryAppScheduler;
+import org.springframework.cloud.deployer.spi.scheduler.cloudfoundry.CloudFoundrySchedulerProperties;
+import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -48,7 +46,7 @@ public class CFConvertScheduleConfiguration {
 	@ConditionalOnMissingBean
 	public ReactorSchedulerClient reactorSchedulerClient(ConnectionContext context,
 			TokenProvider passwordGrantTokenProvider,
-			ConverterCloudFoundryConnectionProperties properties) {
+			CloudFoundrySchedulerProperties properties) {
 		return ReactorSchedulerClient.builder()
 				.connectionContext(context)
 				.tokenProvider(passwordGrantTokenProvider)
@@ -69,56 +67,23 @@ public class CFConvertScheduleConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnMissingBean
+	public CloudFoundrySchedulerProperties cloudFoundrySchedulerProperties() {
+		return new CloudFoundrySchedulerProperties();
+	}
+
+	@Bean
 	ConvertScheduleService scheduleService(CloudFoundryOperations cloudFoundryOperations,
 			SchedulerClient schedulerClient,
-			ConverterCloudFoundryConnectionProperties properties) {
+			CloudFoundryConnectionProperties properties) {
 		return new CFConvertSchedulerService(cloudFoundryOperations,
 				schedulerClient, properties);
 	}
-
 	@Bean
-	@ConditionalOnMissingBean
-	public CloudFoundryOperations cloudFoundryOperations(CloudFoundryClient cloudFoundryClient,
-			ConverterCloudFoundryConnectionProperties properties) {
-		return DefaultCloudFoundryOperations.builder()
-				.cloudFoundryClient(cloudFoundryClient)
-				.organization(properties.getOrg())
-				.space(properties.getSpace())
-				.build();
+	public CloudFoundryAppScheduler scheduler(SchedulerClient client, CloudFoundryOperations operations,
+			CloudFoundryConnectionProperties properties, TaskLauncher taskLauncher,
+			CloudFoundrySchedulerProperties schedulerProperties) {
+		return new CloudFoundryAppScheduler(client, operations, properties,  (CloudFoundryTaskLauncher) taskLauncher, schedulerProperties);
 	}
 
-	@Bean
-	@ConditionalOnMissingBean
-	@ConfigurationProperties(prefix = ConverterCloudFoundryConnectionProperties.CLOUDFOUNDRY_PROPERTIES)
-	public ConverterCloudFoundryConnectionProperties cloudFoundryConnectionProperties() {
-		return new ConverterCloudFoundryConnectionProperties();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public CloudFoundryClient cloudFoundryClient(ConnectionContext connectionContext, TokenProvider tokenProvider) {
-		return ReactorCloudFoundryClient.builder()
-				.connectionContext(connectionContext)
-				.tokenProvider(tokenProvider)
-				.build();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public ConnectionContext connectionContext(ConverterCloudFoundryConnectionProperties properties) {
-		return DefaultConnectionContext.builder()
-				.apiHost(properties.getUrl().getHost())
-				.skipSslValidation(properties.isSkipSslValidation())
-				.build();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public TokenProvider tokenProvider(ConverterCloudFoundryConnectionProperties properties) {
-		return PasswordGrantTokenProvider.builder()
-				.username(properties.getUsername())
-				.password(properties.getPassword())
-				.loginHint(properties.getLoginHint())
-				.build();
-	}
 }

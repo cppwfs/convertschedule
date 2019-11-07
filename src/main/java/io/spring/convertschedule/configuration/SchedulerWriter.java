@@ -16,16 +16,89 @@
 
 package io.spring.convertschedule.configuration;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
+import io.spring.convertschedule.AppResourceCommon;
 import io.spring.convertschedule.ConvertScheduleInfo;
 
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 
 public class SchedulerWriter<T> implements ItemWriter {
+
+	@Autowired
+	public ConverterProperties converterProperties;
+
+	private Scheduler scheduler;
+
+	private String schedulePrefix = "scdf-";
+
 	@Override
 	public void write(List list) throws Exception {
-		list.stream().forEach(
-				item -> System.out.println(item + "<<>>" + ((ConvertScheduleInfo)item).getCommandLineArgs()));
+		list.stream().forEach(item -> {
+			ConvertScheduleInfo scheduleInfo = ((ConvertScheduleInfo) item);
+			System.out.println(item + "<<>>" + scheduleInfo.getCommandLineArgs());
+			String scheduleName = scheduleInfo.getScheduleName() + "-" + getSchedulePrefix(scheduleInfo.getTaskDefinitionName());
+			AppDefinition appDefinition = new AppDefinition(scheduleName, scheduleInfo.getScheduleProperties());
+			Map<String, String> schedulerProperties = extractAndQualifySchedulerProperties(scheduleInfo.getScheduleProperties());
+			List<String>  revisedCommandLineArgs = new ArrayList<String>();//TODO need to add command line args
+			revisedCommandLineArgs.add("--spring.cloud.scheduler.task.launcher.taskName=" + scheduleInfo.getTaskDefinitionName());
+			ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, schedulerProperties, new HashMap<>(), revisedCommandLineArgs, scheduleInfo.getScheduleName(), getTaskLauncherResource());
+			scheduler.schedule(scheduleRequest);
+			scheduler.unschedule(scheduleInfo.getScheduleName());
+		});
+	}
+
+	public void setScheduler(Scheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
+	private String getSchedulePrefix(String taskDefinitionName) {
+		return schedulePrefix + taskDefinitionName;
+	}
+
+	/**
+	 * Retain only properties that are meant for the <em>scheduler</em> of a given task(those
+	 * that start with {@code scheduler.}and qualify all
+	 * property values with the {@code spring.cloud.scheduler.} prefix.
+	 *
+	 * @param input the scheduler properties
+	 * @return scheduler properties for the task
+	 */
+	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input) {
+		final String prefix = "scheduler.";
+		final int prefixLength = prefix.length();
+
+		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
+				.filter(kv -> kv.getKey().startsWith(prefix))
+				.collect(Collectors.toMap(kv -> "spring.cloud.scheduler." + kv.getKey().substring(prefixLength), kv -> kv.getValue(),
+						(fromWildcard, fromApp) -> fromApp));
+
+		return result;
+	}
+
+	protected Resource getTaskLauncherResource() {
+		final URI url;
+		try {
+			url = new URI(this.converterProperties.getSchedulerTaskLauncherUrl());
+		}
+		catch (URISyntaxException urise) {
+			throw new IllegalStateException(urise);
+		}
+		AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader());
+		return appResourceCommon.getResource(this.converterProperties.getSchedulerTaskLauncherUrl());
 	}
 }

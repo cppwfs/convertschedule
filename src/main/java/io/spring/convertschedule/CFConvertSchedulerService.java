@@ -30,6 +30,7 @@ import org.cloudfoundry.operations.spaces.SpaceSummary;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
 
 public class CFConvertSchedulerService implements ConvertScheduleService {
@@ -38,11 +39,11 @@ public class CFConvertSchedulerService implements ConvertScheduleService {
 
 	private SchedulerClient schedulerClient;
 
-	private ConverterCloudFoundryConnectionProperties properties;
+	private CloudFoundryConnectionProperties properties;
 
 	public CFConvertSchedulerService(CloudFoundryOperations cloudFoundryOperations,
 			SchedulerClient schedulerClient,
-			ConverterCloudFoundryConnectionProperties properties) {
+			CloudFoundryConnectionProperties properties) {
 		this.cloudFoundryOperations = cloudFoundryOperations;
 		this.schedulerClient = schedulerClient;
 		this.properties = properties;
