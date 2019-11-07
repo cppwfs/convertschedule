@@ -25,6 +25,9 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
@@ -39,6 +42,8 @@ public class SchedulerWriter<T> implements ItemWriter {
 	@Autowired
 	public ConverterProperties converterProperties;
 
+	private static final Logger logger = LoggerFactory.getLogger(SchedulerWriter.class);
+
 	private Scheduler scheduler;
 
 	private String schedulePrefix = "scdf-";
@@ -47,7 +52,7 @@ public class SchedulerWriter<T> implements ItemWriter {
 	public void write(List list) throws Exception {
 		list.stream().forEach(item -> {
 			ConvertScheduleInfo scheduleInfo = ((ConvertScheduleInfo) item);
-			System.out.println(item + "<<>>" + scheduleInfo.getCommandLineArgs());
+			logger.info(item + "<<>>" + scheduleInfo.getCommandLineArgs());
 			String scheduleName = scheduleInfo.getScheduleName() + "-" + getSchedulePrefix(scheduleInfo.getTaskDefinitionName());
 			AppDefinition appDefinition = new AppDefinition(scheduleName, scheduleInfo.getScheduleProperties());
 			Map<String, String> schedulerProperties = extractAndQualifySchedulerProperties(scheduleInfo.getScheduleProperties());
@@ -77,7 +82,6 @@ public class SchedulerWriter<T> implements ItemWriter {
 	 */
 	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input) {
 		final String prefix = "spring.cloud.scheduler.";
-		final int prefixLength = prefix.length();
 
 		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(prefix))
