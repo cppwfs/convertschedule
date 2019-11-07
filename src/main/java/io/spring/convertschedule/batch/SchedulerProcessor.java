@@ -14,13 +14,11 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.configuration;
+package io.spring.convertschedule.batch;
 
-import io.spring.convertschedule.ConvertScheduleInfo;
-import io.spring.convertschedule.ConvertScheduleService;
+import io.spring.convertschedule.service.ConvertScheduleService;
 
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 
 public class SchedulerProcessor<T> implements ItemProcessor {
 

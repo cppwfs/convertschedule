@@ -14,19 +14,16 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.configuration;
+package io.spring.convertschedule.batch;
 
-import java.io.Serializable;
 import java.util.List;
 
 import io.jsonwebtoken.lang.Assert;
-import io.spring.convertschedule.ConvertScheduleInfo;
-import io.spring.convertschedule.ConvertScheduleService;
+import io.spring.convertschedule.service.ConvertScheduleService;
 
 
 import org.springframework.batch.item.ItemReader;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
-import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 
 public class SchedulerReader<T> implements ItemReader {
 

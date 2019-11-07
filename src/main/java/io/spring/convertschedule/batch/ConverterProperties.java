@@ -14,25 +14,16 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule;
+package io.spring.convertschedule.batch;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ConverterProperties {
+	private String schedulerTaskLauncherUrl = "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:2.3.0.BUILD-SNAPSHOT";
 
-import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-
-@Profile("Kubernetes")
-@Configuration
-public class KubernetesConvertSchedulerService implements ConvertScheduleService {
-	@Override
-	public List<ConvertScheduleInfo> scheduleInfoList() {
-		return new ArrayList<>();
+	public String getSchedulerTaskLauncherUrl() {
+		return schedulerTaskLauncherUrl;
 	}
 
-	@Override
-	public ConvertScheduleInfo enrichScheduleMetadata(ConvertScheduleInfo scheduleInfo) {
-		return scheduleInfo;
+	public void setSchedulerTaskLauncherUrl(String schedulerTaskLauncherUrl) {
+		this.schedulerTaskLauncherUrl = schedulerTaskLauncherUrl;
 	}
 }

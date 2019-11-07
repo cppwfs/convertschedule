@@ -18,8 +18,8 @@ package io.spring.convertschedule.configuration;
 
 import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import io.pivotal.scheduler.SchedulerClient;
-import io.spring.convertschedule.CFConvertSchedulerService;
-import io.spring.convertschedule.ConvertScheduleService;
+import io.spring.convertschedule.service.CFConvertSchedulerService;
+import io.spring.convertschedule.service.ConvertScheduleService;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;

@@ -14,9 +14,11 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule;
+package io.spring.convertschedule.service;
 
 import java.util.List;
+
+import io.spring.convertschedule.batch.ConvertScheduleInfo;
 
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 

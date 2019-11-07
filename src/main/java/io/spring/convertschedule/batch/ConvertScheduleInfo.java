@@ -14,16 +14,19 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.configuration;
+package io.spring.convertschedule.batch;
 
-public class ConverterProperties {
-	private String schedulerTaskLauncherUrl = "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:2.3.0.BUILD-SNAPSHOT";
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 
-	public String getSchedulerTaskLauncherUrl() {
-		return schedulerTaskLauncherUrl;
+public class ConvertScheduleInfo extends ScheduleInfo {
+
+	private String commandLineArgs;
+
+	public String getCommandLineArgs() {
+		return commandLineArgs;
 	}
 
-	public void setSchedulerTaskLauncherUrl(String schedulerTaskLauncherUrl) {
-		this.schedulerTaskLauncherUrl = schedulerTaskLauncherUrl;
+	public void setCommandLineArgs(String commandLineArgs) {
+		this.commandLineArgs = commandLineArgs;
 	}
 }

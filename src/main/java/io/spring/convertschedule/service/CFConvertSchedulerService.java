@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule;
+package io.spring.convertschedule.service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +22,7 @@ import java.util.Map;
 
 import io.pivotal.scheduler.SchedulerClient;
 import io.pivotal.scheduler.v1.jobs.ListJobsRequest;
+import io.spring.convertschedule.batch.ConvertScheduleInfo;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationEnvironments;
 import org.cloudfoundry.operations.applications.ApplicationSummary;

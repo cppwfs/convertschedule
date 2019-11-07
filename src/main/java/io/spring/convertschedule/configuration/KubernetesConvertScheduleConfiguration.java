@@ -16,8 +16,8 @@
 
 package io.spring.convertschedule.configuration;
 
-import io.spring.convertschedule.ConvertScheduleService;
-import io.spring.convertschedule.KubernetesConvertSchedulerService;
+import io.spring.convertschedule.service.ConvertScheduleService;
+import io.spring.convertschedule.service.KubernetesConvertSchedulerService;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

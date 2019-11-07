@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.configuration;
+package io.spring.convertschedule.batch;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,9 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-
-import io.spring.convertschedule.AppResourceCommon;
-import io.spring.convertschedule.ConvertScheduleInfo;
 
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +53,7 @@ public class SchedulerWriter<T> implements ItemWriter {
 			Map<String, String> schedulerProperties = extractAndQualifySchedulerProperties(scheduleInfo.getScheduleProperties());
 			List<String>  revisedCommandLineArgs = new ArrayList<String>();//TODO need to add command line args
 			revisedCommandLineArgs.add("--spring.cloud.scheduler.task.launcher.taskName=" + scheduleInfo.getTaskDefinitionName());
-			ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, schedulerProperties, new HashMap<>(), revisedCommandLineArgs, scheduleInfo.getScheduleName(), getTaskLauncherResource());
+			ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, schedulerProperties, new HashMap<>(), revisedCommandLineArgs, scheduleName, getTaskLauncherResource());
 			scheduler.schedule(scheduleRequest);
 			scheduler.unschedule(scheduleInfo.getScheduleName());
 		});
@@ -79,12 +76,12 @@ public class SchedulerWriter<T> implements ItemWriter {
 	 * @return scheduler properties for the task
 	 */
 	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input) {
-		final String prefix = "scheduler.";
+		final String prefix = "spring.cloud.scheduler.";
 		final int prefixLength = prefix.length();
 
 		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
 				.filter(kv -> kv.getKey().startsWith(prefix))
-				.collect(Collectors.toMap(kv -> "spring.cloud.scheduler." + kv.getKey().substring(prefixLength), kv -> kv.getValue(),
+				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue(),
 						(fromWildcard, fromApp) -> fromApp));
 
 		return result;

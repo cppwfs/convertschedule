@@ -16,7 +16,11 @@
 
 package io.spring.convertschedule.configuration;
 
-import io.spring.convertschedule.ConvertScheduleService;
+import io.spring.convertschedule.service.ConvertScheduleService;
+import io.spring.convertschedule.batch.ConverterProperties;
+import io.spring.convertschedule.batch.SchedulerProcessor;
+import io.spring.convertschedule.batch.SchedulerReader;
+import io.spring.convertschedule.batch.SchedulerWriter;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -26,14 +30,11 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import static org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties.CLOUDFOUNDRY_PROPERTIES;
 
 @Configuration
 @EnableBatchProcessing

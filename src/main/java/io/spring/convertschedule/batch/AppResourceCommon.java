@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule;
+package io.spring.convertschedule.batch;
 
 import java.io.File;
 import java.io.IOException;
