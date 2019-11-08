@@ -16,6 +16,7 @@
 
 package io.spring.convertschedule.configuration;
 
+import io.spring.convertschedule.batch.ConverterProperties;
 import io.spring.convertschedule.service.ConvertScheduleService;
 import io.spring.convertschedule.service.KubernetesConvertSchedulerService;
 
@@ -28,7 +29,7 @@ import org.springframework.context.annotation.Profile;
 public class KubernetesConvertScheduleConfiguration {
 
 	@Bean
-	public ConvertScheduleService scheduleService() {
-		return new KubernetesConvertSchedulerService();
+	public ConvertScheduleService scheduleService(ConverterProperties converterProperties) {
+		return new KubernetesConvertSchedulerService(converterProperties);
 	}
 }

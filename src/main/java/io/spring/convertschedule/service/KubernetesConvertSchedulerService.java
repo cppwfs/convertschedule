@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.spring.convertschedule.batch.ConvertScheduleInfo;
+import io.spring.convertschedule.batch.ConverterProperties;
 
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,11 @@ import org.springframework.context.annotation.Profile;
 
 @Profile("Kubernetes")
 @Configuration
-public class KubernetesConvertSchedulerService implements ConvertScheduleService {
+public class KubernetesConvertSchedulerService extends  AbstractConvertService {
+
+	public KubernetesConvertSchedulerService(ConverterProperties converterProperties) {
+		super(converterProperties);
+	}
 	@Override
 	public List<ConvertScheduleInfo> scheduleInfoList() {
 		return new ArrayList<>();
