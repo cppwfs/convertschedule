@@ -18,6 +18,7 @@ package io.spring.convertschedule.configuration;
 
 import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import io.pivotal.scheduler.SchedulerClient;
+import io.spring.convertschedule.batch.ConverterProperties;
 import io.spring.convertschedule.service.CFConvertSchedulerService;
 import io.spring.convertschedule.service.ConvertScheduleService;
 import org.cloudfoundry.operations.CloudFoundryOperations;
@@ -75,9 +76,9 @@ public class CFConvertScheduleConfiguration {
 	@Bean
 	ConvertScheduleService scheduleService(CloudFoundryOperations cloudFoundryOperations,
 			SchedulerClient schedulerClient,
-			CloudFoundryConnectionProperties properties) {
+			CloudFoundryConnectionProperties properties, ConverterProperties converterProperties) {
 		return new CFConvertSchedulerService(cloudFoundryOperations,
-				schedulerClient, properties);
+				schedulerClient, properties, converterProperties);
 	}
 	@Bean
 	public CloudFoundryAppScheduler scheduler(SchedulerClient client, CloudFoundryOperations operations,

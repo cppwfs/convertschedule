@@ -21,6 +21,7 @@ import java.util.List;
 
 import io.spring.convertschedule.batch.ConvertScheduleInfo;
 
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
@@ -35,5 +36,10 @@ public class KubernetesConvertSchedulerService implements ConvertScheduleService
 	@Override
 	public ConvertScheduleInfo enrichScheduleMetadata(ConvertScheduleInfo scheduleInfo) {
 		return scheduleInfo;
+	}
+
+	@Override
+	public void migrateSchedule(Scheduler scheduler, ConvertScheduleInfo scheduleInfo) {
+
 	}
 }

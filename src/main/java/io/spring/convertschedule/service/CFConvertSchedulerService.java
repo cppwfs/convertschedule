@@ -16,13 +16,20 @@
 
 package io.spring.convertschedule.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import io.pivotal.scheduler.SchedulerClient;
 import io.pivotal.scheduler.v1.jobs.ListJobsRequest;
+import io.spring.convertschedule.batch.AppResourceCommon;
 import io.spring.convertschedule.batch.ConvertScheduleInfo;
+import io.spring.convertschedule.batch.ConverterProperties;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationEnvironments;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
@@ -31,8 +38,14 @@ import org.cloudfoundry.operations.spaces.SpaceSummary;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
+import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
 
 public class CFConvertSchedulerService implements ConvertScheduleService {
 
@@ -42,13 +55,15 @@ public class CFConvertSchedulerService implements ConvertScheduleService {
 
 	private CloudFoundryConnectionProperties properties;
 
+	private ConverterProperties converterProperties;
+
 	public CFConvertSchedulerService(CloudFoundryOperations cloudFoundryOperations,
 			SchedulerClient schedulerClient,
-			CloudFoundryConnectionProperties properties) {
+			CloudFoundryConnectionProperties properties, ConverterProperties converterProperties) {
 		this.cloudFoundryOperations = cloudFoundryOperations;
 		this.schedulerClient = schedulerClient;
 		this.properties = properties;
-
+		this.converterProperties = new ConverterProperties();
 	}
 
 	@Override
@@ -97,6 +112,52 @@ public class CFConvertSchedulerService implements ConvertScheduleService {
 		return scheduleInfo;
 	}
 
+	@Override
+	public void migrateSchedule(Scheduler scheduler, ConvertScheduleInfo scheduleInfo) {
+		String scheduleName = scheduleInfo.getScheduleName() + "-" + getSchedulePrefix(scheduleInfo.getTaskDefinitionName());
+		AppDefinition appDefinition = new AppDefinition(scheduleName, scheduleInfo.getScheduleProperties());
+		Map<String, String> schedulerProperties = extractAndQualifySchedulerProperties(scheduleInfo.getScheduleProperties());
+		List<String>  revisedCommandLineArgs = new ArrayList<String>();//TODO need to add command line args
+		revisedCommandLineArgs.add("--spring.cloud.scheduler.task.launcher.taskName=" + scheduleInfo.getTaskDefinitionName());
+		ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, schedulerProperties, new HashMap<>(), revisedCommandLineArgs, scheduleName, getTaskLauncherResource());
+		scheduler.schedule(scheduleRequest);
+		scheduler.unschedule(scheduleInfo.getScheduleName());
+	}
+
+	private String getSchedulePrefix(String taskDefinitionName) {
+		return converterProperties.getSchedulerPrefix() + taskDefinitionName;
+	}
+
+	/**
+	 * Retain only properties that are meant for the <em>scheduler</em> of a given task(those
+	 * that start with {@code scheduler.}and qualify all
+	 * property values with the {@code spring.cloud.scheduler.} prefix.
+	 *
+	 * @param input the scheduler properties
+	 * @return scheduler properties for the task
+	 */
+	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input) {
+		final String prefix = "spring.cloud.scheduler.";
+
+		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
+				.filter(kv -> kv.getKey().startsWith(prefix))
+				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue(),
+						(fromWildcard, fromApp) -> fromApp));
+
+		return result;
+	}
+
+	protected Resource getTaskLauncherResource() {
+		final URI url;
+		try {
+			url = new URI(this.converterProperties.getSchedulerTaskLauncherUrl());
+		}
+		catch (URISyntaxException urise) {
+			throw new IllegalStateException(urise);
+		}
+		AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader());
+		return appResourceCommon.getResource(this.converterProperties.getSchedulerTaskLauncherUrl());
+	}
 
 	/**
 	 * Retrieve a {@link Mono} containing a {@link SpaceSummary} for the specified name.

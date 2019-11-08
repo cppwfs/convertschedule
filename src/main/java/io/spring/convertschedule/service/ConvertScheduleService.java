@@ -21,6 +21,7 @@ import java.util.List;
 import io.spring.convertschedule.batch.ConvertScheduleInfo;
 
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
+import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 
 public interface ConvertScheduleService {
 
@@ -35,4 +36,11 @@ public interface ConvertScheduleService {
 	 * @return enriched {@link ScheduleInfo}
 	 */
 	ConvertScheduleInfo enrichScheduleMetadata(ConvertScheduleInfo scheduleInfo);
+
+	/**
+	 * Migrates existing schedule to new SCDF schedule.
+	 * @param scheduler the deployer scheduler to build the new schedule.
+	 * @param scheduleInfo the schedule info containing the existing schedule.
+	 */
+	void migrateSchedule(Scheduler scheduler, ConvertScheduleInfo scheduleInfo);
 }

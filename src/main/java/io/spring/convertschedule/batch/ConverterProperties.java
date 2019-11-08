@@ -19,11 +19,21 @@ package io.spring.convertschedule.batch;
 public class ConverterProperties {
 	private String schedulerTaskLauncherUrl = "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:2.3.0.BUILD-SNAPSHOT";
 
+	private String schedulerPrefix = "scdf_";
+
 	public String getSchedulerTaskLauncherUrl() {
 		return schedulerTaskLauncherUrl;
 	}
 
 	public void setSchedulerTaskLauncherUrl(String schedulerTaskLauncherUrl) {
 		this.schedulerTaskLauncherUrl = schedulerTaskLauncherUrl;
+	}
+
+	public String getSchedulerPrefix() {
+		return schedulerPrefix;
+	}
+
+	public void setSchedulerPrefix(String schedulerPrefix) {
+		this.schedulerPrefix = schedulerPrefix;
 	}
 }

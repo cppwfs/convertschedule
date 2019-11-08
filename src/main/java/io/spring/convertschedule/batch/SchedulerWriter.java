@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import io.spring.convertschedule.service.ConvertScheduleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,28 +40,18 @@ import org.springframework.core.io.Resource;
 
 public class SchedulerWriter<T> implements ItemWriter {
 
-	@Autowired
-	public ConverterProperties converterProperties;
-
 	private static final Logger logger = LoggerFactory.getLogger(SchedulerWriter.class);
 
 	private Scheduler scheduler;
 
-	private String schedulePrefix = "scdf-";
+	private ConvertScheduleService scheduleService;
 
 	@Override
 	public void write(List list) throws Exception {
 		list.stream().forEach(item -> {
 			ConvertScheduleInfo scheduleInfo = ((ConvertScheduleInfo) item);
-			logger.info(item + "<<>>" + scheduleInfo.getCommandLineArgs());
-			String scheduleName = scheduleInfo.getScheduleName() + "-" + getSchedulePrefix(scheduleInfo.getTaskDefinitionName());
-			AppDefinition appDefinition = new AppDefinition(scheduleName, scheduleInfo.getScheduleProperties());
-			Map<String, String> schedulerProperties = extractAndQualifySchedulerProperties(scheduleInfo.getScheduleProperties());
-			List<String>  revisedCommandLineArgs = new ArrayList<String>();//TODO need to add command line args
-			revisedCommandLineArgs.add("--spring.cloud.scheduler.task.launcher.taskName=" + scheduleInfo.getTaskDefinitionName());
-			ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, schedulerProperties, new HashMap<>(), revisedCommandLineArgs, scheduleName, getTaskLauncherResource());
-			scheduler.schedule(scheduleRequest);
-			scheduler.unschedule(scheduleInfo.getScheduleName());
+			logger.info(">>>>" + item + "<<>>" + scheduleInfo.getCommandLineArgs());
+			scheduleService.migrateSchedule(scheduler, scheduleInfo);
 		});
 	}
 
@@ -68,38 +59,7 @@ public class SchedulerWriter<T> implements ItemWriter {
 		this.scheduler = scheduler;
 	}
 
-	private String getSchedulePrefix(String taskDefinitionName) {
-		return schedulePrefix + taskDefinitionName;
-	}
-
-	/**
-	 * Retain only properties that are meant for the <em>scheduler</em> of a given task(those
-	 * that start with {@code scheduler.}and qualify all
-	 * property values with the {@code spring.cloud.scheduler.} prefix.
-	 *
-	 * @param input the scheduler properties
-	 * @return scheduler properties for the task
-	 */
-	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input) {
-		final String prefix = "spring.cloud.scheduler.";
-
-		Map<String, String> result = new TreeMap<>(input).entrySet().stream()
-				.filter(kv -> kv.getKey().startsWith(prefix))
-				.collect(Collectors.toMap(kv -> kv.getKey(), kv -> kv.getValue(),
-						(fromWildcard, fromApp) -> fromApp));
-
-		return result;
-	}
-
-	protected Resource getTaskLauncherResource() {
-		final URI url;
-		try {
-			url = new URI(this.converterProperties.getSchedulerTaskLauncherUrl());
-		}
-		catch (URISyntaxException urise) {
-			throw new IllegalStateException(urise);
-		}
-		AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader());
-		return appResourceCommon.getResource(this.converterProperties.getSchedulerTaskLauncherUrl());
+	public void setScheduleService(ConvertScheduleService scheduleService) {
+		this.scheduleService = scheduleService;
 	}
 }

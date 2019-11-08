@@ -74,9 +74,10 @@ public class BatchConfiguration {
 	}
 
 	@Bean
-	public SchedulerWriter<ScheduleInfo> itemWriter(Scheduler scheduler) {
+	public SchedulerWriter<ScheduleInfo> itemWriter(Scheduler scheduler, ConvertScheduleService scheduleService) {
 		SchedulerWriter<ScheduleInfo> result = new SchedulerWriter<>();
 		result.setScheduler(scheduler);
+		result.setScheduleService(scheduleService);
 		return result;
 	}
 
