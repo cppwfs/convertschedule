@@ -18,6 +18,9 @@ package io.spring.convertschedule.service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -28,9 +31,17 @@ import io.spring.convertschedule.batch.ConverterProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.util.StringUtils;
 
 public abstract class AbstractConvertService implements ConvertScheduleService {
 
+	private final static String DATA_FLOW_URI_KEY = "spring.cloud.dataflow.client.serverUri";
+
+	private final static String COMMAND_ARGUMENT_PREFIX = "cmdarg.";
+
+	protected final static String APP_PREFIX = "app.";
+
+	protected final static String DEPLOYER_PREFIX = "deployer.";
 
 	private ConverterProperties converterProperties;
 
@@ -71,5 +82,51 @@ public abstract class AbstractConvertService implements ConvertScheduleService {
 		}
 		AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), new DefaultResourceLoader());
 		return appResourceCommon.getResource(this.converterProperties.getSchedulerTaskLauncherUrl());
+	}
+
+	protected List<String> tagCommandLineArgs(List<String> args) {
+		List<String> taggedArgs = new ArrayList<>();
+
+		for(String arg : args) {
+			if(arg.contains("spring.cloud.task.name")) {
+				continue;
+			}
+			String updatedArg = arg;
+			if (!arg.startsWith(DATA_FLOW_URI_KEY) && !"--".concat(arg).startsWith(DATA_FLOW_URI_KEY)) {
+				updatedArg = COMMAND_ARGUMENT_PREFIX +
+						converterProperties.getTaskLauncherPrefix() + "." + arg;
+			}
+			taggedArgs.add(updatedArg);
+		}
+		return taggedArgs;
+	}
+
+	protected Map<String, String> tagProperties(String appName, Map<String, String> appProperties, String prefix) {
+		Map<String, String> taggedAppProperties = new HashMap<>(appProperties.size());
+
+		for(String key : appProperties.keySet()) {
+			if(key.contains("spring.cloud.task.name")) {
+				continue;
+			}
+			String updatedKey = key;
+			if (!key.startsWith(DATA_FLOW_URI_KEY)) {
+				if (StringUtils.hasText(appName)) {
+					updatedKey = converterProperties.getTaskLauncherPrefix() + "." +
+							prefix + appName + "." + key;
+				}
+				else {
+					updatedKey = converterProperties.getTaskLauncherPrefix() + "." +
+							prefix + key;
+				}
+			}
+			taggedAppProperties.put(updatedKey, appProperties.get(key));
+		}
+		return taggedAppProperties;
+	}
+
+	protected Map<String, String> addSchedulerAppProps(Map<String, String> properties) {
+		Map<String, String> appProperties = new HashMap<>(properties);
+		appProperties.put("spring.cloud.dataflow.client.serverUri", converterProperties.getDataflowServerUri());
+		return appProperties;
 	}
 }

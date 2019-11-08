@@ -19,7 +19,17 @@ package io.spring.convertschedule.batch;
 public class ConverterProperties {
 	private String schedulerTaskLauncherUrl = "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:2.3.0.BUILD-SNAPSHOT";
 
+	/**
+	 * The prefix for the updated schedules.
+	 */
 	private String schedulerPrefix = "scdf_";
+
+	/**
+	 * The prefix to attach to the application properties to be sent to the schedule task launcher.
+	 */
+	private String taskLauncherPrefix = "tasklauncher";
+
+	private String dataflowServerUri = "http://localhost:9393";
 
 	public String getSchedulerTaskLauncherUrl() {
 		return schedulerTaskLauncherUrl;
@@ -35,5 +45,21 @@ public class ConverterProperties {
 
 	public void setSchedulerPrefix(String schedulerPrefix) {
 		this.schedulerPrefix = schedulerPrefix;
+	}
+
+	public String getTaskLauncherPrefix() {
+		return taskLauncherPrefix;
+	}
+
+	public void setTaskLauncherPrefix(String taskLauncherPrefix) {
+		this.taskLauncherPrefix = taskLauncherPrefix;
+	}
+
+	public String getDataflowServerUri() {
+		return dataflowServerUri;
+	}
+
+	public void setDataflowServerUri(String dataflowServerUri) {
+		this.dataflowServerUri = dataflowServerUri;
 	}
 }

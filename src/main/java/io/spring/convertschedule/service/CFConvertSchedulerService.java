@@ -119,17 +119,19 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 		String scheduleName = scheduleInfo.getScheduleName() + "-" + getSchedulePrefix(scheduleInfo.getTaskDefinitionName());
 		Map<String, String> appProperties;
 		try {
-			appProperties = getSpringProperties(scheduleInfo.getScheduleProperties());
+			appProperties = getSpringAppProperties(scheduleInfo.getScheduleProperties());
+			appProperties = tagProperties(null, appProperties, APP_PREFIX);
 		}
 		catch (Exception e) {
 			appProperties = new HashMap<>();
 		}
-
+		appProperties = addSchedulerAppProps(appProperties);
 		AppDefinition appDefinition = new AppDefinition(scheduleName, appProperties);
 		Map<String, String> schedulerProperties = extractAndQualifySchedulerProperties(scheduleInfo.getScheduleProperties());
 		List<String>  revisedCommandLineArgs = null;
 		try {
 			revisedCommandLineArgs = new ArrayList<>(Arrays.asList(CommandLineUtils.translateCommandline(scheduleInfo.getCommandLineArgs())));
+			revisedCommandLineArgs = tagCommandLineArgs(revisedCommandLineArgs);
 		}
 		catch (Exception e) {
 			revisedCommandLineArgs = new ArrayList<>();
@@ -140,7 +142,7 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 		scheduler.unschedule(scheduleInfo.getScheduleName());
 	}
 
-	private Map<String, String> getSpringProperties(Map<String, String> properties) throws Exception{
+	private Map<String, String> getSpringAppProperties(Map<String, String> properties) throws Exception{
 		return  new ObjectMapper()
 				.readValue(properties.get("SPRING_APPLICATION_JSON"), Map.class);
 	}
