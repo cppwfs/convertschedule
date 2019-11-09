@@ -21,12 +21,14 @@ import io.pivotal.scheduler.SchedulerClient;
 import io.spring.convertschedule.batch.ConverterProperties;
 import io.spring.convertschedule.service.CFConvertSchedulerService;
 import io.spring.convertschedule.service.ConvertScheduleService;
+import io.spring.convertschedule.service.TaskDefinitionRepository;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
 import reactor.core.publisher.Mono;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.resource.maven.MavenResource;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
@@ -41,6 +43,9 @@ import org.springframework.core.io.Resource;
 
 @Configuration
 @Profile("cf")
+@EntityScan({
+		"org.springframework.cloud.dataflow.core"
+})
 public class CFConvertScheduleConfiguration {
 
 	@Bean
@@ -76,9 +81,10 @@ public class CFConvertScheduleConfiguration {
 	@Bean
 	ConvertScheduleService scheduleService(CloudFoundryOperations cloudFoundryOperations,
 			SchedulerClient schedulerClient,
-			CloudFoundryConnectionProperties properties, ConverterProperties converterProperties) {
+			CloudFoundryConnectionProperties properties, ConverterProperties converterProperties,
+			TaskDefinitionRepository taskDefinitionRepository) {
 		return new CFConvertSchedulerService(cloudFoundryOperations,
-				schedulerClient, properties, converterProperties);
+				schedulerClient, properties, converterProperties, taskDefinitionRepository);
 	}
 	@Bean
 	public CloudFoundryAppScheduler scheduler(SchedulerClient client, CloudFoundryOperations operations,

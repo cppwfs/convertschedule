@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import io.spring.convertschedule.batch.AppResourceCommon;
 import io.spring.convertschedule.batch.ConverterProperties;
 
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -45,8 +46,15 @@ public abstract class AbstractConvertService implements ConvertScheduleService {
 
 	private ConverterProperties converterProperties;
 
-	public AbstractConvertService(ConverterProperties converterProperties) {
+	private TaskDefinitionRepository taskDefinitionRepository;
+
+	public AbstractConvertService(ConverterProperties converterProperties, TaskDefinitionRepository taskDefinitionRepository) {
 		this.converterProperties = converterProperties;
+		this.taskDefinitionRepository = taskDefinitionRepository;
+	}
+
+	public TaskDefinition findTaskDefinitionByName(String taskDefinitionName) {
+		return this.taskDefinitionRepository.findByTaskName(taskDefinitionName);
 	}
 
 	protected String getSchedulePrefix(String taskDefinitionName) {

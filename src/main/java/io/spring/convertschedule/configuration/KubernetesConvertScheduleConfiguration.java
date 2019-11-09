@@ -16,20 +16,41 @@
 
 package io.spring.convertschedule.configuration;
 
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.spring.convertschedule.batch.ConverterProperties;
 import io.spring.convertschedule.service.ConvertScheduleService;
 import io.spring.convertschedule.service.KubernetesConvertSchedulerService;
+import io.spring.convertschedule.service.TaskDefinitionRepository;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.cloud.deployer.spi.scheduler.kubernetes.KubernetesScheduler;
+import org.springframework.cloud.deployer.spi.scheduler.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
 @Profile("kubernetes")
+@EntityScan({
+		"org.springframework.cloud.dataflow.core"
+})
 public class KubernetesConvertScheduleConfiguration {
 
 	@Bean
-	public ConvertScheduleService scheduleService(ConverterProperties converterProperties) {
-		return new KubernetesConvertSchedulerService(converterProperties);
+	public ConvertScheduleService scheduleService(ConverterProperties converterProperties,
+			TaskDefinitionRepository taskDefinitionRepository) {
+		return new KubernetesConvertSchedulerService(converterProperties, taskDefinitionRepository);
 	}
+	@Bean
+	@ConditionalOnMissingBean
+	public KubernetesSchedulerProperties kubernetesSchedulerProperties() {
+		return new KubernetesSchedulerProperties();
+	}
+
+	@Bean
+	public KubernetesScheduler scheduler(KubernetesClient kubernetesClient, KubernetesSchedulerProperties kubernetesSchedulerProperties) {
+		return new KubernetesScheduler(kubernetesClient, kubernetesSchedulerProperties);
+	}
+
 }

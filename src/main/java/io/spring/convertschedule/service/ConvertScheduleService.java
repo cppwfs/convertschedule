@@ -20,6 +20,7 @@ import java.util.List;
 
 import io.spring.convertschedule.batch.ConvertScheduleInfo;
 
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 
@@ -43,4 +44,11 @@ public interface ConvertScheduleService {
 	 * @param scheduleInfo the schedule info containing the existing schedule.
 	 */
 	void migrateSchedule(Scheduler scheduler, ConvertScheduleInfo scheduleInfo);
+
+	/**
+	 * Retrieve {@link TaskDefinition} for the name provided
+	 * @param taskDefinitionName the name of the {@link TaskDefinition}.
+	 * @return a TaskDefinition
+	 */
+	TaskDefinition findTaskDefinitionByName(String taskDefinitionName);
 }

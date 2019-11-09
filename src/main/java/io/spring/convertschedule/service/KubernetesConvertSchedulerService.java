@@ -30,8 +30,8 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class KubernetesConvertSchedulerService extends  AbstractConvertService {
 
-	public KubernetesConvertSchedulerService(ConverterProperties converterProperties) {
-		super(converterProperties);
+	public KubernetesConvertSchedulerService(ConverterProperties converterProperties, TaskDefinitionRepository taskDefinitionRepository) {
+		super(converterProperties, taskDefinitionRepository);
 	}
 	@Override
 	public List<ConvertScheduleInfo> scheduleInfoList() {

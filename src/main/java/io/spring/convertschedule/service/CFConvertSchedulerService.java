@@ -16,20 +16,15 @@
 
 package io.spring.convertschedule.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pivotal.scheduler.SchedulerClient;
 import io.pivotal.scheduler.v1.jobs.ListJobsRequest;
-import io.spring.convertschedule.batch.AppResourceCommon;
 import io.spring.convertschedule.batch.ConvertScheduleInfo;
 import io.spring.convertschedule.batch.ConverterProperties;
 import org.cloudfoundry.operations.CloudFoundryOperations;
@@ -38,18 +33,15 @@ import org.cloudfoundry.operations.applications.ApplicationSummary;
 import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
 import org.cloudfoundry.operations.spaces.SpaceSummary;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
-import org.codehaus.plexus.util.cli.Commandline;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
+import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
 
 public class CFConvertSchedulerService extends AbstractConvertService {
 
@@ -61,8 +53,9 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 
 	public CFConvertSchedulerService(CloudFoundryOperations cloudFoundryOperations,
 			SchedulerClient schedulerClient,
-			CloudFoundryConnectionProperties properties, ConverterProperties converterProperties) {
-		super(converterProperties);
+			CloudFoundryConnectionProperties properties, ConverterProperties converterProperties,
+			TaskDefinitionRepository taskDefinitionRepository) {
+		super(converterProperties, taskDefinitionRepository);
 		this.cloudFoundryOperations = cloudFoundryOperations;
 		this.schedulerClient = schedulerClient;
 		this.properties = properties;
@@ -70,7 +63,6 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 
 	@Override
 	public List<ConvertScheduleInfo> scheduleInfoList() {
-
 		Flux<ApplicationSummary> applicationSummaries = cacheAppSummaries();
 		return this.getSpace(this.properties.getSpace()).flatMap(requestSummary -> {
 			return this.schedulerClient.jobs().list(ListJobsRequest.builder()
@@ -120,7 +112,9 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 		Map<String, String> appProperties;
 		try {
 			appProperties = getSpringAppProperties(scheduleInfo.getScheduleProperties());
-			appProperties = tagProperties(null, appProperties, APP_PREFIX);
+			TaskDefinition taskDefinition = findTaskDefinitionByName(appProperties.get("spring.cloud.task.name"));
+			System.out.println(">>>>>" + taskDefinition.getRegisteredAppName());
+			appProperties = tagProperties(taskDefinition.getRegisteredAppName(), appProperties, APP_PREFIX);
 		}
 		catch (Exception e) {
 			appProperties = new HashMap<>();

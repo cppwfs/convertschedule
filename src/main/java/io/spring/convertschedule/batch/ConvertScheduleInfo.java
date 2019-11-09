@@ -22,11 +22,21 @@ public class ConvertScheduleInfo extends ScheduleInfo {
 
 	private String commandLineArgs;
 
+	private String registeredAppName;
+
 	public String getCommandLineArgs() {
 		return commandLineArgs;
 	}
 
 	public void setCommandLineArgs(String commandLineArgs) {
 		this.commandLineArgs = commandLineArgs;
+	}
+
+	public String getRegisteredAppName() {
+		return registeredAppName;
+	}
+
+	public void setRegisteredAppName(String registeredAppName) {
+		this.registeredAppName = registeredAppName;
 	}
 }
