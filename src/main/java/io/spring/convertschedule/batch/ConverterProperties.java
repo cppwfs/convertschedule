@@ -22,7 +22,7 @@ public class ConverterProperties {
 	/**
 	 * The prefix for the updated schedules.
 	 */
-	private String schedulerPrefix = "scdf_";
+	private String schedulerPrefix = "scdf-";
 
 	/**
 	 * The prefix to attach to the application properties to be sent to the schedule task launcher.

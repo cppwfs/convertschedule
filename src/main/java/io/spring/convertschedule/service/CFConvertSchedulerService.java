@@ -42,6 +42,7 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
+import org.springframework.util.StringUtils;
 
 public class CFConvertSchedulerService extends AbstractConvertService {
 
@@ -80,7 +81,15 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 								scheduleInfo.setTaskDefinitionName(optionalApp.getName());
 
 								int locationOfArgs = job.getCommand().indexOf("org.springframework.boot.loader.JarLauncher") + "org.springframework.boot.loader.JarLauncher".length();
-								scheduleInfo.setCommandLineArgs(job.getCommand().substring(locationOfArgs));
+								String commandArgs = job.getCommand().substring(locationOfArgs);
+								if(StringUtils.hasText(commandArgs)) {
+									try {
+										scheduleInfo.setCommandLineArgs(Arrays.asList(CommandLineUtils.translateCommandline(commandArgs)));
+									}
+									catch (Exception e) {
+										throw new IllegalArgumentException(e);
+									}
+								}
 								if (job.getJobSchedules() != null) {
 									scheduleInfo.getScheduleProperties().put(SchedulerPropertyKeys.CRON_EXPRESSION,
 											job.getJobSchedules().get(0).getExpression());
@@ -103,35 +112,29 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 		for (Map.Entry<String, Object> var : environment.getUserProvided().entrySet()) {
 			scheduleInfo.getScheduleProperties().put(var.getKey(), (String) var.getValue());
 		}
-		return scheduleInfo;
-	}
-
-	@Override
-	public void migrateSchedule(Scheduler scheduler, ConvertScheduleInfo scheduleInfo) {
-		String scheduleName = scheduleInfo.getScheduleName() + "-" + getSchedulePrefix(scheduleInfo.getTaskDefinitionName());
+		List<String>  revisedCommandLineArgs = tagCommandLineArgs(scheduleInfo.getCommandLineArgs());
+		revisedCommandLineArgs.add("--spring.cloud.scheduler.task.launcher.taskName=" + scheduleInfo.getTaskDefinitionName());
+		scheduleInfo.setCommandLineArgs(revisedCommandLineArgs);
 		Map<String, String> appProperties;
 		try {
 			appProperties = getSpringAppProperties(scheduleInfo.getScheduleProperties());
 			TaskDefinition taskDefinition = findTaskDefinitionByName(appProperties.get("spring.cloud.task.name"));
-			System.out.println(">>>>>" + taskDefinition.getRegisteredAppName());
 			appProperties = tagProperties(taskDefinition.getRegisteredAppName(), appProperties, APP_PREFIX);
 		}
 		catch (Exception e) {
 			appProperties = new HashMap<>();
 		}
 		appProperties = addSchedulerAppProps(appProperties);
-		AppDefinition appDefinition = new AppDefinition(scheduleName, appProperties);
+		scheduleInfo.setAppProperties(appProperties);
+		return scheduleInfo;
+	}
+
+	@Override
+	public void migrateSchedule(Scheduler scheduler, ConvertScheduleInfo scheduleInfo) {
+		String scheduleName = scheduleInfo.getScheduleName() + "-" + getSchedulePrefix(scheduleInfo.getTaskDefinitionName());
+		AppDefinition appDefinition = new AppDefinition(scheduleName, scheduleInfo.getAppProperties());
 		Map<String, String> schedulerProperties = extractAndQualifySchedulerProperties(scheduleInfo.getScheduleProperties());
-		List<String>  revisedCommandLineArgs = null;
-		try {
-			revisedCommandLineArgs = new ArrayList<>(Arrays.asList(CommandLineUtils.translateCommandline(scheduleInfo.getCommandLineArgs())));
-			revisedCommandLineArgs = tagCommandLineArgs(revisedCommandLineArgs);
-		}
-		catch (Exception e) {
-			revisedCommandLineArgs = new ArrayList<>();
-		}
-		revisedCommandLineArgs.add("--spring.cloud.scheduler.task.launcher.taskName=" + scheduleInfo.getTaskDefinitionName());
-		ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, schedulerProperties, new HashMap<>(), revisedCommandLineArgs, scheduleName, getTaskLauncherResource());
+		ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, schedulerProperties, new HashMap<>(), scheduleInfo.getCommandLineArgs(), scheduleName, getTaskLauncherResource());
 		scheduler.schedule(scheduleRequest);
 		scheduler.unschedule(scheduleInfo.getScheduleName());
 	}

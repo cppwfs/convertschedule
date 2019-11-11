@@ -16,19 +16,26 @@
 
 package io.spring.convertschedule.batch;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 
 public class ConvertScheduleInfo extends ScheduleInfo {
 
-	private String commandLineArgs;
+	private List<String> commandLineArgs = new ArrayList<>();
 
 	private String registeredAppName;
 
-	public String getCommandLineArgs() {
+	private Map<String, String> appProperties = new HashMap<>();
+
+	public List<String> getCommandLineArgs() {
 		return commandLineArgs;
 	}
 
-	public void setCommandLineArgs(String commandLineArgs) {
+	public void setCommandLineArgs(List<String> commandLineArgs) {
 		this.commandLineArgs = commandLineArgs;
 	}
 
@@ -38,5 +45,13 @@ public class ConvertScheduleInfo extends ScheduleInfo {
 
 	public void setRegisteredAppName(String registeredAppName) {
 		this.registeredAppName = registeredAppName;
+	}
+
+	public Map<String, String> getAppProperties() {
+		return appProperties;
+	}
+
+	public void setAppProperties(Map<String, String> appProperties) {
+		this.appProperties = appProperties;
 	}
 }
