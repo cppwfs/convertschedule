@@ -16,7 +16,6 @@
 
 package io.spring.convertschedule.service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +68,8 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 			return this.schedulerClient.jobs().list(ListJobsRequest.builder()
 					.spaceId(requestSummary.getId())
 					.page(1)
-					.detailed(true).build());})
+					.detailed(true).build());
+		})
 				.flatMapIterable(jobs -> jobs.getResources())// iterate over the resources returned.
 				.flatMap(job -> {
 					return getApplication(applicationSummaries,
@@ -82,7 +82,7 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 
 								int locationOfArgs = job.getCommand().indexOf("org.springframework.boot.loader.JarLauncher") + "org.springframework.boot.loader.JarLauncher".length();
 								String commandArgs = job.getCommand().substring(locationOfArgs);
-								if(StringUtils.hasText(commandArgs)) {
+								if (StringUtils.hasText(commandArgs)) {
 									try {
 										scheduleInfo.setCommandLineArgs(Arrays.asList(CommandLineUtils.translateCommandline(commandArgs)));
 									}
@@ -109,21 +109,28 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 						name(scheduleInfo.getTaskDefinitionName()).
 						build()).
 				block();
-		for (Map.Entry<String, Object> var : environment.getUserProvided().entrySet()) {
-			scheduleInfo.getScheduleProperties().put(var.getKey(), (String) var.getValue());
+		if (environment != null) {
+			for (Map.Entry<String, Object> var : environment.getUserProvided().entrySet()) {
+				scheduleInfo.getScheduleProperties().put(var.getKey(), (String) var.getValue());
+			}
 		}
-		List<String>  revisedCommandLineArgs = tagCommandLineArgs(scheduleInfo.getCommandLineArgs());
+		List<String> revisedCommandLineArgs = tagCommandLineArgs(scheduleInfo.getCommandLineArgs());
 		revisedCommandLineArgs.add("--spring.cloud.scheduler.task.launcher.taskName=" + scheduleInfo.getTaskDefinitionName());
 		scheduleInfo.setCommandLineArgs(revisedCommandLineArgs);
-		Map<String, String> appProperties;
+		Map<String, String> appProperties = null;
 		try {
 			appProperties = getSpringAppProperties(scheduleInfo.getScheduleProperties());
-			TaskDefinition taskDefinition = findTaskDefinitionByName(appProperties.get("spring.cloud.task.name"));
-			appProperties = tagProperties(taskDefinition.getRegisteredAppName(), appProperties, APP_PREFIX);
 		}
-		catch (Exception e) {
-			appProperties = new HashMap<>();
+		catch (Exception exception) {
+			throw new IllegalArgumentException("Unable to parse SPRING_APPLICATION_JSON from USER VARIABLES", exception);
 		}
+		TaskDefinition taskDefinition = findTaskDefinitionByName(appProperties.get("spring.cloud.task.name"));
+		if (appProperties.size() > 0 && taskDefinition == null) {
+			throw new IllegalStateException(String.format("The schedule %s contains " +
+							"properties but the task definition %s does not exist and thus can't be migrated",
+					scheduleInfo.getScheduleName(), scheduleInfo.getTaskDefinitionName()));
+		}
+		appProperties = tagProperties(taskDefinition.getRegisteredAppName(), appProperties, APP_PREFIX);
 		appProperties = addSchedulerAppProps(appProperties);
 		scheduleInfo.setAppProperties(appProperties);
 		return scheduleInfo;
@@ -139,13 +146,21 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 		scheduler.unschedule(scheduleInfo.getScheduleName());
 	}
 
-	private Map<String, String> getSpringAppProperties(Map<String, String> properties) throws Exception{
-		return  new ObjectMapper()
-				.readValue(properties.get("SPRING_APPLICATION_JSON"), Map.class);
+	private Map<String, String> getSpringAppProperties(Map<String, String> properties) throws Exception {
+		Map<String, String> result;
+		if(properties.containsKey("SPRING_APPLICATION_JSON")) {
+			result = new ObjectMapper()
+					.readValue(properties.get("SPRING_APPLICATION_JSON"), Map.class);
+		}
+		else {
+			result = new HashMap<>();
+		}
+		return result;
 	}
 
 	/**
 	 * Retrieve a {@link Mono} containing a {@link SpaceSummary} for the specified name.
+	 *
 	 * @param spaceName the name of space to search.
 	 * @return the {@link SpaceSummary} associated with the spaceName.
 	 */
@@ -156,8 +171,10 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 				.singleOrEmpty()
 				.cast(SpaceSummary.class);
 	}
+
 	/**
 	 * Retrieve a {@link Flux} containing the available {@link SpaceSummary}s.
+	 *
 	 * @return {@link Flux} of {@link SpaceSummary}s.
 	 */
 	private Flux<SpaceSummary> requestSpaces() {
@@ -183,8 +200,9 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 
 	/**
 	 * Retrieve a {@link Mono} containing the {@link ApplicationSummary} associated with the appId.
+	 *
 	 * @param applicationSummaries {@link Flux} of {@link ApplicationSummary}s to filter.
-	 * @param appId the id of the {@link ApplicationSummary} to search.
+	 * @param appId                the id of the {@link ApplicationSummary} to search.
 	 */
 	private Mono<ApplicationSummary> getApplication(Flux<ApplicationSummary> applicationSummaries,
 			String appId) {
