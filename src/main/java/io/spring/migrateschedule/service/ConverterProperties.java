@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.batch;
+package io.spring.migrateschedule.service;
 
 public class ConverterProperties {
 	private String schedulerTaskLauncherUrl = "maven://org.springframework.cloud:spring-cloud-dataflow-scheduler-task-launcher:2.3.0.BUILD-SNAPSHOT";

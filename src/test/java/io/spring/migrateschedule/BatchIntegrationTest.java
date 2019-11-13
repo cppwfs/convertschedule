@@ -14,16 +14,16 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule;
+package io.spring.migrateschedule;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
-import io.spring.convertschedule.batch.ConvertScheduleInfo;
-import io.spring.convertschedule.configuration.BatchConfiguration;
-import io.spring.convertschedule.service.ConvertScheduleService;
-import io.spring.convertschedule.service.TaskDefinitionRepository;
+import io.spring.migrateschedule.service.ConvertScheduleInfo;
+import io.spring.migrateschedule.configuration.BatchConfiguration;
+import io.spring.migrateschedule.service.MigrateScheduleService;
+import io.spring.migrateschedule.service.TaskDefinitionRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -74,7 +74,7 @@ public class BatchIntegrationTest {
 	private JobLauncherTestUtils jobLauncherTestUtils;
 
 	@Autowired
-	private ConvertScheduleService convertScheduleService;
+	private MigrateScheduleService migrateScheduleService;
 
 	@MockBean
 	private TaskDefinitionRepository taskDefinitionRepository;
@@ -93,8 +93,8 @@ public class BatchIntegrationTest {
 		assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
 		final ArgumentCaptor<Scheduler> schedulerArgumentCaptor = ArgumentCaptor.forClass(Scheduler.class);
 		final ArgumentCaptor<ConvertScheduleInfo> convertScheduleInfoArgumentCaptor = ArgumentCaptor.forClass(ConvertScheduleInfo.class);
-		verify(this.convertScheduleService, times(1)).enrichScheduleMetadata(convertScheduleInfoArgumentCaptor.capture());
-		verify(this.convertScheduleService, times(1)).migrateSchedule(schedulerArgumentCaptor.capture(), convertScheduleInfoArgumentCaptor.capture());
+		verify(this.migrateScheduleService, times(1)).enrichScheduleMetadata(convertScheduleInfoArgumentCaptor.capture());
+		verify(this.migrateScheduleService, times(1)).migrateSchedule(schedulerArgumentCaptor.capture(), convertScheduleInfoArgumentCaptor.capture());
 	}
 
 	private JobParameters defaultJobParameters() {
@@ -105,16 +105,16 @@ public class BatchIntegrationTest {
 	@Configuration
 	public static class BatchTestConfiguration {
 		@Bean
-		public ConvertScheduleService convertScheduleService() {
-			ConvertScheduleService convertScheduleService = mock(ConvertScheduleService.class);
+		public MigrateScheduleService convertScheduleService() {
+			MigrateScheduleService migrateScheduleService = mock(MigrateScheduleService.class);
 			ConvertScheduleInfo convertScheduleInfo = new ConvertScheduleInfo();
 			convertScheduleInfo.setScheduleName(DEFAULT_SCHEDULE_NAME);
 			convertScheduleInfo.setTaskDefinitionName(DEFAULT_TASK_DEFINITION_NAME);
 			convertScheduleInfo.setScheduleProperties(new HashMap<>());
 			convertScheduleInfo.setRegisteredAppName(DEFAULT_APP_NAME);
-			when(convertScheduleService.scheduleInfoList()).thenReturn(Collections.singletonList(convertScheduleInfo));
-			when(convertScheduleService.enrichScheduleMetadata(any())).thenReturn(convertScheduleInfo);
-			return convertScheduleService;
+			when(migrateScheduleService.scheduleInfoList()).thenReturn(Collections.singletonList(convertScheduleInfo));
+			when(migrateScheduleService.enrichScheduleMetadata(any())).thenReturn(convertScheduleInfo);
+			return migrateScheduleService;
 		}
 	}
 }

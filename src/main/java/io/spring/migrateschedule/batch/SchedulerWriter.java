@@ -14,11 +14,12 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.batch;
+package io.spring.migrateschedule.batch;
 
 import java.util.List;
 
-import io.spring.convertschedule.service.ConvertScheduleService;
+import io.spring.migrateschedule.service.ConvertScheduleInfo;
+import io.spring.migrateschedule.service.MigrateScheduleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ public class SchedulerWriter<T> implements ItemWriter {
 
 	private Scheduler scheduler;
 
-	private ConvertScheduleService scheduleService;
+	private MigrateScheduleService scheduleService;
 
 	@Override
 	public void write(List list) {
@@ -46,7 +47,7 @@ public class SchedulerWriter<T> implements ItemWriter {
 		this.scheduler = scheduler;
 	}
 
-	public void setScheduleService(ConvertScheduleService scheduleService) {
+	public void setScheduleService(MigrateScheduleService scheduleService) {
 		this.scheduleService = scheduleService;
 	}
 }

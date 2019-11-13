@@ -14,16 +14,16 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule;
+package io.spring.migrateschedule;
 
 
 import java.util.HashMap;
 
 import io.pivotal.scheduler.SchedulerClient;
-import io.spring.convertschedule.batch.ConvertScheduleInfo;
-import io.spring.convertschedule.batch.ConverterProperties;
-import io.spring.convertschedule.service.CFConvertSchedulerService;
-import io.spring.convertschedule.service.TaskDefinitionRepository;
+import io.spring.migrateschedule.service.ConvertScheduleInfo;
+import io.spring.migrateschedule.service.ConverterProperties;
+import io.spring.migrateschedule.service.CFMigrateSchedulerService;
+import io.spring.migrateschedule.service.TaskDefinitionRepository;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationEnvironments;
 import org.cloudfoundry.operations.applications.GetApplicationEnvironmentsRequest;
@@ -43,14 +43,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class CFConvertScheduleConfigurationTests {
+public class CFMigrateScheduleConfigurationTests {
 
 	public static final String DEFAULT_SCHEDULE_NAME = "defaultScheduleName";
 	public static final String DEFAULT_TASK_DEFINITION_NAME = "defaultTaskDefinitionName";
 	public static final String DEFAULT_APP_NAME = "defaultAppName";
 	public static final String DEFAULT_CMD_ARG = "defaultCmd=WOW";
 
-	private CFConvertSchedulerService cfConvertSchedulerService;
+	private CFMigrateSchedulerService cfConvertSchedulerService;
 	private CloudFoundryOperations cloudFoundryOperations;
 	private CloudFoundryConnectionProperties cloudFoundryConnectionProperties;
 	private ConverterProperties converterProperties;
@@ -66,7 +66,7 @@ public class CFConvertScheduleConfigurationTests {
 		this.converterProperties = new ConverterProperties();
 		this.taskDefinitionRepository = Mockito.mock(TaskDefinitionRepository.class);
 		this.scheduler = Mockito.mock(Scheduler.class);
-		this.cfConvertSchedulerService = new CFConvertSchedulerService(this.cloudFoundryOperations,
+		this.cfConvertSchedulerService = new CFMigrateSchedulerService(this.cloudFoundryOperations,
 				this.schedulerClient,
 				this.cloudFoundryConnectionProperties, this.converterProperties,
 				this.taskDefinitionRepository) ;

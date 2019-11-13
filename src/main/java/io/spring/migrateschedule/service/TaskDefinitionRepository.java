@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.service;
+package io.spring.migrateschedule.service;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.data.domain.Page;

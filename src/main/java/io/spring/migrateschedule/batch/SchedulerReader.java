@@ -14,12 +14,13 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.batch;
+package io.spring.migrateschedule.batch;
 
 import java.util.List;
 
 import io.jsonwebtoken.lang.Assert;
-import io.spring.convertschedule.service.ConvertScheduleService;
+import io.spring.migrateschedule.service.ConvertScheduleInfo;
+import io.spring.migrateschedule.service.MigrateScheduleService;
 
 
 import org.springframework.batch.item.ItemReader;
@@ -33,9 +34,9 @@ public class SchedulerReader<T> implements ItemReader {
 
 	private int scheduleCount;
 
-	public SchedulerReader(ConvertScheduleService convertScheduleService) {
-		Assert.notNull(convertScheduleService, "convertScheduleService must not be null");
-		scheduleInfoList = convertScheduleService.scheduleInfoList();
+	public SchedulerReader(MigrateScheduleService migrateScheduleService) {
+		Assert.notNull(migrateScheduleService, "convertScheduleService must not be null");
+		scheduleInfoList = migrateScheduleService.scheduleInfoList();
 		scheduleCount = scheduleInfoList.size();
 	}
 

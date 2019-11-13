@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.service;
+package io.spring.migrateschedule.service;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,8 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pivotal.scheduler.SchedulerClient;
 import io.pivotal.scheduler.v1.jobs.ListJobsRequest;
 import io.pivotal.scheduler.v1.jobs.ListJobsResponse;
-import io.spring.convertschedule.batch.ConvertScheduleInfo;
-import io.spring.convertschedule.batch.ConverterProperties;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.operations.applications.ApplicationEnvironments;
 import org.cloudfoundry.operations.applications.ApplicationSummary;
@@ -41,15 +38,13 @@ import reactor.core.publisher.Mono;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerException;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
-import org.springframework.util.SocketUtils;
 import org.springframework.util.StringUtils;
 
-public class CFConvertSchedulerService extends AbstractConvertService {
+public class CFMigrateSchedulerService extends AbstractMigrateService {
 
 	private final static int PCF_PAGE_START_NUM = 1; //First PageNum for PCFScheduler starts at 1.
 
@@ -61,7 +56,7 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 
 	private CloudFoundryConnectionProperties properties;
 
-	public CFConvertSchedulerService(CloudFoundryOperations cloudFoundryOperations,
+	public CFMigrateSchedulerService(CloudFoundryOperations cloudFoundryOperations,
 			SchedulerClient schedulerClient,
 			CloudFoundryConnectionProperties properties, ConverterProperties converterProperties,
 			TaskDefinitionRepository taskDefinitionRepository) {

@@ -14,14 +14,14 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.configuration;
+package io.spring.migrateschedule.configuration;
 
 import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import io.pivotal.scheduler.SchedulerClient;
-import io.spring.convertschedule.batch.ConverterProperties;
-import io.spring.convertschedule.service.CFConvertSchedulerService;
-import io.spring.convertschedule.service.ConvertScheduleService;
-import io.spring.convertschedule.service.TaskDefinitionRepository;
+import io.spring.migrateschedule.service.ConverterProperties;
+import io.spring.migrateschedule.service.CFMigrateSchedulerService;
+import io.spring.migrateschedule.service.MigrateScheduleService;
+import io.spring.migrateschedule.service.TaskDefinitionRepository;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 import org.cloudfoundry.reactor.ConnectionContext;
 import org.cloudfoundry.reactor.TokenProvider;
@@ -46,7 +46,7 @@ import org.springframework.core.io.Resource;
 @EntityScan({
 		"org.springframework.cloud.dataflow.core"
 })
-public class CFConvertScheduleConfiguration {
+public class CFMigrateScheduleConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
@@ -79,11 +79,11 @@ public class CFConvertScheduleConfiguration {
 	}
 
 	@Bean
-	ConvertScheduleService scheduleService(CloudFoundryOperations cloudFoundryOperations,
+	MigrateScheduleService scheduleService(CloudFoundryOperations cloudFoundryOperations,
 			SchedulerClient schedulerClient,
 			CloudFoundryConnectionProperties properties, ConverterProperties converterProperties,
 			TaskDefinitionRepository taskDefinitionRepository) {
-		return new CFConvertSchedulerService(cloudFoundryOperations,
+		return new CFMigrateSchedulerService(cloudFoundryOperations,
 				schedulerClient, properties, converterProperties, taskDefinitionRepository);
 	}
 	@Bean

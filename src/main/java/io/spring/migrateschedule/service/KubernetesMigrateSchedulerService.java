@@ -14,13 +14,10 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.service;
+package io.spring.migrateschedule.service;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.spring.convertschedule.batch.ConvertScheduleInfo;
-import io.spring.convertschedule.batch.ConverterProperties;
 
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.context.annotation.Configuration;
@@ -28,9 +25,9 @@ import org.springframework.context.annotation.Profile;
 
 @Profile("Kubernetes")
 @Configuration
-public class KubernetesConvertSchedulerService extends  AbstractConvertService {
+public class KubernetesMigrateSchedulerService extends AbstractMigrateService {
 
-	public KubernetesConvertSchedulerService(ConverterProperties converterProperties, TaskDefinitionRepository taskDefinitionRepository) {
+	public KubernetesMigrateSchedulerService(ConverterProperties converterProperties, TaskDefinitionRepository taskDefinitionRepository) {
 		super(converterProperties, taskDefinitionRepository);
 	}
 	@Override

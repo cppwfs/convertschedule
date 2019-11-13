@@ -14,17 +14,15 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.service;
+package io.spring.migrateschedule.service;
 
 import java.util.List;
-
-import io.spring.convertschedule.batch.ConvertScheduleInfo;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 
-public interface ConvertScheduleService {
+public interface MigrateScheduleService {
 
 	/**
 	 * Retrieve all available {@link ScheduleInfo}s.

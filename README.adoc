@@ -1,7 +1,43 @@
 = Cloud Scheduler Demo
 
+The purpose of this project is to migrate existing schedules created with Spring Cloud Data Flow 2.2.0 and before to the new 2.3.0 format.
+
 == Build the project
 
 ```
 mvn clean install
 ```
+
+== Running The Project For Cloud Foundry
+Establish the following Properties:
+```
+jbp_config_spring_auto_reconfiguration='{enabled: false}'
+spring_cloud_deployer_cloudfoundry_space=<your space>
+spring_cloud_deployer_cloudfoundry_org=<your org>
+spring_cloud_deployer_cloudfoundry_username=<username>
+spring_cloud_deployer_cloudfoundry_password=<password>
+spring_cloud_deployer_cloudfoundry_url=<cf api URL>
+spring_cloud_scheduler_cloudfoundry_schedulerUrl=<scheduler URL>
+spring_cloud_deployer_cloudfoundry_skipSslValidation=<true/false>
+spring_cloud_deployer_cloudfoundry_services=<scheduler service>
+spring_cloud_deployer_cloudfoundry_task_services=<scheduler service, database service>
+spring_profiles_active=cf
+spring.cloud.deployer.cloudfoundry.healthCheckTimeout=300
+spring.cloud.deployer.cloudfoundry.apiTimeout=300
+dataflowServerUri=<the URI to the SCDF instance>
+spring_cloud_task_closecontextEnabled=true
+### Establish connection to database via JDBC param
+spring_datasource_url=<your datasource URL>
+spring_datasource_username=<username>
+spring_datasource_password=<password>
+spring_datasource_driverClassName=<jdbcdriver>
+### Or bind to your database.
+```
+Execute the migrator tool as shown below:
+
+```
+java -jar  migrateschedule-1.0.0.BUILD-SNAPSHOT.jar
+```
+
+== Running The Project For Kubernetes
+TBD

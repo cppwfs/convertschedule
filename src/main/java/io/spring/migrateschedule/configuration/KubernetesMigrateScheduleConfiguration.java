@@ -14,13 +14,13 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.configuration;
+package io.spring.migrateschedule.configuration;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.spring.convertschedule.batch.ConverterProperties;
-import io.spring.convertschedule.service.ConvertScheduleService;
-import io.spring.convertschedule.service.KubernetesConvertSchedulerService;
-import io.spring.convertschedule.service.TaskDefinitionRepository;
+import io.spring.migrateschedule.service.ConverterProperties;
+import io.spring.migrateschedule.service.MigrateScheduleService;
+import io.spring.migrateschedule.service.KubernetesMigrateSchedulerService;
+import io.spring.migrateschedule.service.TaskDefinitionRepository;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -35,12 +35,12 @@ import org.springframework.context.annotation.Profile;
 @EntityScan({
 		"org.springframework.cloud.dataflow.core"
 })
-public class KubernetesConvertScheduleConfiguration {
+public class KubernetesMigrateScheduleConfiguration {
 
 	@Bean
-	public ConvertScheduleService scheduleService(ConverterProperties converterProperties,
+	public MigrateScheduleService scheduleService(ConverterProperties converterProperties,
 			TaskDefinitionRepository taskDefinitionRepository) {
-		return new KubernetesConvertSchedulerService(converterProperties, taskDefinitionRepository);
+		return new KubernetesMigrateSchedulerService(converterProperties, taskDefinitionRepository);
 	}
 	@Bean
 	@ConditionalOnMissingBean

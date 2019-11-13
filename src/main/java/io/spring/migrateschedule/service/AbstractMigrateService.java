@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.service;
+package io.spring.migrateschedule.service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,16 +25,13 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import io.spring.convertschedule.batch.AppResourceCommon;
-import io.spring.convertschedule.batch.ConverterProperties;
-
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
-public abstract class AbstractConvertService implements ConvertScheduleService {
+public abstract class AbstractMigrateService implements MigrateScheduleService {
 
 	private final static String DATA_FLOW_URI_KEY = "spring.cloud.dataflow.client.serverUri";
 
@@ -48,7 +45,7 @@ public abstract class AbstractConvertService implements ConvertScheduleService {
 
 	private TaskDefinitionRepository taskDefinitionRepository;
 
-	public AbstractConvertService(ConverterProperties converterProperties, TaskDefinitionRepository taskDefinitionRepository) {
+	public AbstractMigrateService(ConverterProperties converterProperties, TaskDefinitionRepository taskDefinitionRepository) {
 		this.converterProperties = converterProperties;
 		this.taskDefinitionRepository = taskDefinitionRepository;
 	}

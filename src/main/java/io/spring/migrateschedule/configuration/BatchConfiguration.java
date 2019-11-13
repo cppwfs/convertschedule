@@ -14,13 +14,13 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.configuration;
+package io.spring.migrateschedule.configuration;
 
-import io.spring.convertschedule.service.ConvertScheduleService;
-import io.spring.convertschedule.batch.ConverterProperties;
-import io.spring.convertschedule.batch.SchedulerProcessor;
-import io.spring.convertschedule.batch.SchedulerReader;
-import io.spring.convertschedule.batch.SchedulerWriter;
+import io.spring.migrateschedule.service.MigrateScheduleService;
+import io.spring.migrateschedule.service.ConverterProperties;
+import io.spring.migrateschedule.batch.SchedulerProcessor;
+import io.spring.migrateschedule.batch.SchedulerReader;
+import io.spring.migrateschedule.batch.SchedulerWriter;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -69,12 +69,12 @@ public class BatchConfiguration {
 	}
 
 	@Bean
-	public SchedulerReader<ScheduleInfo> itemReader(ConvertScheduleService scheduler) {
+	public SchedulerReader<ScheduleInfo> itemReader(MigrateScheduleService scheduler) {
 		return new SchedulerReader<>(scheduler);
 	}
 
 	@Bean
-	public SchedulerWriter<ScheduleInfo> itemWriter(Scheduler scheduler, ConvertScheduleService scheduleService) {
+	public SchedulerWriter<ScheduleInfo> itemWriter(Scheduler scheduler, MigrateScheduleService scheduleService) {
 		SchedulerWriter<ScheduleInfo> result = new SchedulerWriter<>();
 		result.setScheduler(scheduler);
 		result.setScheduleService(scheduleService);
@@ -82,8 +82,8 @@ public class BatchConfiguration {
 	}
 
 	@Bean
-	public SchedulerProcessor<ScheduleInfo> itemProcessor(ConvertScheduleService convertScheduleService ) {
-		return new SchedulerProcessor<>(convertScheduleService);
+	public SchedulerProcessor<ScheduleInfo> itemProcessor(MigrateScheduleService migrateScheduleService) {
+		return new SchedulerProcessor<>(migrateScheduleService);
 	}
 
 	@Bean

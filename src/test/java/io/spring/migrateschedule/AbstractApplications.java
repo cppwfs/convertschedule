@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule;
+package io.spring.migrateschedule;
 
 import org.cloudfoundry.doppler.LogMessage;
 import org.cloudfoundry.operations.applications.ApplicationDetail;

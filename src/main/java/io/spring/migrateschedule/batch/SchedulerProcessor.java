@@ -14,23 +14,24 @@
  *  limitations under the License.
  */
 
-package io.spring.convertschedule.batch;
+package io.spring.migrateschedule.batch;
 
-import io.spring.convertschedule.service.ConvertScheduleService;
+import io.spring.migrateschedule.service.ConvertScheduleInfo;
+import io.spring.migrateschedule.service.MigrateScheduleService;
 
 import org.springframework.batch.item.ItemProcessor;
 
 public class SchedulerProcessor<T> implements ItemProcessor {
 
-	private ConvertScheduleService convertScheduleService;
+	private MigrateScheduleService migrateScheduleService;
 
-	public SchedulerProcessor(ConvertScheduleService convertScheduleService) {
-		this.convertScheduleService = convertScheduleService;
+	public SchedulerProcessor(MigrateScheduleService migrateScheduleService) {
+		this.migrateScheduleService = migrateScheduleService;
 	}
 
 	@Override
 	public Object process(Object o){
-		return this.convertScheduleService.enrichScheduleMetadata((ConvertScheduleInfo) o);
+		return this.migrateScheduleService.enrichScheduleMetadata((ConvertScheduleInfo) o);
 	}
 
 }
