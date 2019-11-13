@@ -16,27 +16,14 @@
 
 package io.spring.convertschedule.batch;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import io.spring.convertschedule.service.ConvertScheduleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.deployer.resource.maven.MavenProperties;
-import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
 
 public class SchedulerWriter<T> implements ItemWriter {
 
@@ -47,11 +34,11 @@ public class SchedulerWriter<T> implements ItemWriter {
 	private ConvertScheduleService scheduleService;
 
 	@Override
-	public void write(List list) throws Exception {
+	public void write(List list) {
 		list.stream().forEach(item -> {
 			ConvertScheduleInfo scheduleInfo = ((ConvertScheduleInfo) item);
-			logger.info(">>>>" + item + "<<>>" + scheduleInfo.getCommandLineArgs());
 			scheduleService.migrateSchedule(scheduler, scheduleInfo);
+			logger.info(String.format("Migrated Schedule %s ", scheduleInfo.getScheduleName()));
 		});
 	}
 

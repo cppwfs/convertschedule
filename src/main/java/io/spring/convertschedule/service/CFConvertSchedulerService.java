@@ -16,6 +16,8 @@
 
 package io.spring.convertschedule.service;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.pivotal.scheduler.SchedulerClient;
 import io.pivotal.scheduler.v1.jobs.ListJobsRequest;
+import io.pivotal.scheduler.v1.jobs.ListJobsResponse;
 import io.spring.convertschedule.batch.ConvertScheduleInfo;
 import io.spring.convertschedule.batch.ConverterProperties;
 import org.cloudfoundry.operations.CloudFoundryOperations;
@@ -38,12 +41,19 @@ import reactor.core.publisher.Mono;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
+import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
+import org.springframework.cloud.deployer.spi.scheduler.SchedulerException;
 import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
+import org.springframework.util.SocketUtils;
 import org.springframework.util.StringUtils;
 
 public class CFConvertSchedulerService extends AbstractConvertService {
+
+	private final static int PCF_PAGE_START_NUM = 1; //First PageNum for PCFScheduler starts at 1.
+
+	private final static String SCHEDULER_SERVICE_ERROR_MESSAGE = "Scheduler Service returned a null response.";
 
 	private CloudFoundryOperations cloudFoundryOperations;
 
@@ -63,11 +73,24 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 
 	@Override
 	public List<ConvertScheduleInfo> scheduleInfoList() {
+		List<ConvertScheduleInfo> result = new ArrayList<>();
+		for (int i = PCF_PAGE_START_NUM; i <= getJobPageCount(); i++) {
+			System.out.println("********PAGE COUNT -> " + i);
+			List<ConvertScheduleInfo> scheduleInfoPage = getSchedules(i);
+			if(scheduleInfoPage == null) {
+				throw new SchedulerException(SCHEDULER_SERVICE_ERROR_MESSAGE);
+			}
+			result.addAll(scheduleInfoPage);
+		}
+		return result;
+	}
+
+	public List<ConvertScheduleInfo> getSchedules(int page) {
 		Flux<ApplicationSummary> applicationSummaries = cacheAppSummaries();
 		return this.getSpace(this.properties.getSpace()).flatMap(requestSummary -> {
 			return this.schedulerClient.jobs().list(ListJobsRequest.builder()
 					.spaceId(requestSummary.getId())
-					.page(1)
+					.page(page)
 					.detailed(true).build());
 		})
 				.flatMapIterable(jobs -> jobs.getResources())// iterate over the resources returned.
@@ -144,6 +167,22 @@ public class CFConvertSchedulerService extends AbstractConvertService {
 		ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, schedulerProperties, new HashMap<>(), scheduleInfo.getCommandLineArgs(), scheduleName, getTaskLauncherResource());
 		scheduler.schedule(scheduleRequest);
 		scheduler.unschedule(scheduleInfo.getScheduleName());
+	}
+
+	/**
+	 * Retrieves the number of pages that can be returned when retrieving a list of jobs.
+	 * @return an int containing the number of available pages.
+	 */
+	private int getJobPageCount() {
+		ListJobsResponse response = this.getSpace(this.properties.getSpace()).flatMap(requestSummary -> {
+			return this.schedulerClient.jobs().list(ListJobsRequest.builder()
+					.spaceId(requestSummary.getId())
+					.detailed(false).build());
+		}).block();
+		if(response == null) {
+			throw new SchedulerException(SCHEDULER_SERVICE_ERROR_MESSAGE);
+		}
+		return response.getPagination().getTotalPages();
 	}
 
 	private Map<String, String> getSpringAppProperties(Map<String, String> properties) throws Exception {

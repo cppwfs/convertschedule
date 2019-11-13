@@ -31,6 +31,12 @@ public class ConverterProperties {
 
 	private String dataflowServerUri = "http://localhost:9393";
 
+	/**
+	 * The number of seconds to wait for a schedule to complete.
+	 * This excludes the time it takes to stage the application on Cloud Foundry.
+	 */
+	private int scheduleTimeoutInSeconds = 30;
+
 	public String getSchedulerTaskLauncherUrl() {
 		return schedulerTaskLauncherUrl;
 	}
@@ -61,5 +67,13 @@ public class ConverterProperties {
 
 	public void setDataflowServerUri(String dataflowServerUri) {
 		this.dataflowServerUri = dataflowServerUri;
+	}
+
+	public int getScheduleTimeoutInSeconds() {
+		return scheduleTimeoutInSeconds;
+	}
+
+	public void setScheduleTimeoutInSeconds(int scheduleTimeoutInSeconds) {
+		this.scheduleTimeoutInSeconds = scheduleTimeoutInSeconds;
 	}
 }
